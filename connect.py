@@ -102,18 +102,18 @@ def process_reservation():
         print('Searching for training on next ' + when.strftime('%A') + ' ' + when.strftime('%Y-%m-%d'))
         trainings = search_classes(when)
         if 'classes' in trainings and len(trainings['classes']) > 0:
-                trainingId = trainings['classes'][0]['id']
-                if trainingId > 0:
-                    print('Found training with id: ' + str(trainingId))
-                    if len(trainings['classes'][0]['reservation']) > 1:
-                        print('Training already reserved')
+            training_id = trainings['classes'][0]['id']
+            if training_id > 0:
+                print('Found training with id: ' + str(training_id))
+                if len(trainings['classes'][0]['reservation']) > 1:
+                    print('Training already reserved')
+                else:
+                    print('Reserving training')
+                    response = reserve(training_id)
+                    if 'reservation_id' in response:
+                        print('Reservation successful')
                     else:
-                        print('Reserving training')
-                        response = reserve(trainingId)
-                        if 'reservation_id' in response:
-                            print('Reservation successful')
-                        else:
-                            print('Reservation failed')
+                        print('Reservation failed')
 
 if __name__ == '__main__':
     start()
