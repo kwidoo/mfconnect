@@ -82,13 +82,13 @@ def reserve(id):
 def start():
     print('Myfitness reservation script')
     print('Logging in')
-    loginResponse = login()
-    if 'access_token' in loginResponse:
+    login_response = login()
+    if 'access_token' in login_response:
         print('Login successful')
-        mfHeaders['Authorization'] = 'Bearer ' + loginResponse['access_token']
+        mfHeaders['Authorization'] = 'Bearer ' + login_response['access_token']
     else:
         print('Login failed')
-        print(loginResponse)
+        print(login_response)
         exit(2) 
 
 def get_weedkday(day_number = 1):
@@ -96,24 +96,34 @@ def get_weedkday(day_number = 1):
     next_week = today + timedelta(weeks=1)  
     return next_week + timedelta((day_number - next_week.weekday()) % 7)
 
+def check_class_exists( trainings ):
+    if 'classes' in trainings and len(trainings['classes']) > 0:
+        training_id = trainings['classes'][0]['id']
+        if training_id > 0:
+            print('Found training with id: ' + str(training_id))
+            return training_id
+    return False
+
+def check_existing_reservation(trainings):
+    if len(trainings['classes'][0]['reservation']) > 1:
+        print('Training already reserved')
+        return True
+    return False
+
 def process_reservation():
     for week_day in (1,3):
         when = get_weedkday(week_day)
         print('Searching for training on next ' + when.strftime('%A') + ' ' + when.strftime('%Y-%m-%d'))
         trainings = search_classes(when)
-        if 'classes' in trainings and len(trainings['classes']) > 0:
-            training_id = trainings['classes'][0]['id']
-            if training_id > 0:
-                print('Found training with id: ' + str(training_id))
-                if len(trainings['classes'][0]['reservation']) > 1:
-                    print('Training already reserved')
-                else:
-                    print('Reserving training')
-                    response = reserve(training_id)
-                    if 'reservation_id' in response:
-                        print('Reservation successful')
-                    else:
-                        print('Reservation failed')
+        training_id = check_class_exists(trainings)
+        if check_existing_reservation(trainings):
+            continue
+        print('Reserving training')
+        response = reserve(training_id)
+        if 'reservation_id' in response:
+            print('Reservation successful')
+        else:
+            print('Reservation failed')
 
 if __name__ == '__main__':
     start()
