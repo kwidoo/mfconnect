@@ -3,6 +3,10 @@ from dotenv import load_dotenv
 import os
 from datetime import datetime, timedelta
 import json
+import logging
+from rich.logging import RichHandler
+
+logging.basicConfig(level=logging.ERROR, handlers=[RichHandler()])
 
 load_dotenv()
 
@@ -93,21 +97,27 @@ def start():
 
 def get_weedkday(day_number = 1):
     today = datetime.now().date()
-    next_week = today + timedelta(weeks=1)  
-    return next_week + timedelta((day_number - next_week.weekday()) % 7)
+    weekday = today.weekday()
+    days_until_next_week = weekday - 1
+
+    next_week = today + timedelta(days=days_until_next_week)  
+    return next_week + timedelta(days=day_number)
 
 def check_class_exists( trainings ):
-    if 'classes' in trainings and len(trainings['classes']) > 0:
-        training_id = trainings['classes'][0]['id']
-        if training_id > 0:
-            print('Found training with id: ' + str(training_id))
-            return training_id
+    if 'classes' in trainings and trainings['classes'] is not None:
+        if len(trainings['classes']) > 0:
+            training_id = trainings['classes'][0]['id']
+            if training_id > 0:
+                print('Found training with id: ' + str(training_id))
+                return training_id
     return False
 
+
 def check_existing_reservation(trainings):
-    if len(trainings['classes'][0]['reservation']) > 1:
-        print('Training already reserved')
-        return True
+    if trainings['classes'][0]['reservation'] is not None:
+        if len(trainings['classes'][0]['reservation']) > 1:
+            print('Training already reserved')
+            return True
     return False
 
 def process_reservation():
