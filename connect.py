@@ -33,7 +33,7 @@ def login():
     )
     return response.json()
 
-def refresh(): 
+def refresh():
     response = requests.post(
         url + '/oauth/token',
         data = {
@@ -50,7 +50,7 @@ def refresh():
 def search_classes(when):
     response = requests.post(
         url + '/classes/search',
-        data = json.dumps({ 
+        data = json.dumps({
             'additional_service_ids': [],
             'club_ids': [
                 '18'
@@ -93,14 +93,13 @@ def start():
     else:
         print('Login failed')
         print(login_response)
-        exit(2) 
+        exit(2)
 
-def get_weedkday(day_number = 1):
+def get_weekday(day_number = 1):
     today = datetime.now().date()
     weekday = today.weekday()
-    days_until_next_week = weekday - 1
-
-    next_week = today + timedelta(days=days_until_next_week)  
+    days_until_next_week = 7 - weekday
+    next_week = today + timedelta(days=days_until_next_week)
     return next_week + timedelta(days=day_number)
 
 def check_class_exists( trainings ):
@@ -122,7 +121,7 @@ def check_existing_reservation(trainings):
 
 def process_reservation():
     for week_day in (1,3):
-        when = get_weedkday(week_day)
+        when = get_weekday(week_day)
         print('Searching for training on next ' + when.strftime('%A') + ' ' + when.strftime('%Y-%m-%d'))
         trainings = search_classes(when)
         training_id = check_class_exists(trainings)
